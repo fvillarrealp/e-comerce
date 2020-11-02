@@ -17,6 +17,16 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    # Property let us access this as an attribute rather than a method
+    @property # To avoid error when there's no picture
+    def imageURL(self):
+        try:
+            url = self.image.url
+        except:
+            url = ''
+        
+        return url
 
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
