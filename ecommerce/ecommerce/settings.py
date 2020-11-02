@@ -125,3 +125,9 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+
+# Configure image url path
+MEDIA_URL = '/images/'
+
+# Allow us to put the images directly in static/images
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
