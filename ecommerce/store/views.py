@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+import json
 from .models import *
 
 # Create your views here.
@@ -35,4 +36,27 @@ def checkout(request):
     return render(request, 'store/checkout.html', context)
 
 def updateItem(request):
+    data = json.loads(request.body) # Parse the string to json
+    productId = data['productId']
+    action = data['action'] 
+
+    print('productId:', productId)
+    print('action:', action)
+
+    customer = request.user.customer # To get the customer fro  the current user
+    product = Product.objects.get(id=productId) # Getting element by id
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    
+    orderItem , created = OrderItem.objects.get_or_create(order=order, product=product)
+
+    if action == "add":
+        orderItem.quantity = orderItem.quantity + 1
+    elif action == "remove":
+        orderItem.quantity = orderItem.quantity - 1
+
+    orderItem.save()
+
+    if orderItem.quantity <= 0:
+        orderItem.delete()
+
     return JsonResponse('It was added', safe=False)
