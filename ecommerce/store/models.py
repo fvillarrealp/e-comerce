@@ -36,6 +36,18 @@ class Order(models.Model):
 
     def __str__(self):
         return str(self.transaction_id)
+
+    @property
+    def shipping(self): # If at least element of the order is not digital, a shipping exist
+        shipping = False
+        orderItems = self.orderitem_set.all()
+
+        for item in orderItems:
+            if item.product.digital == False:
+                shipping = True
+                break
+        
+        return shipping
     
     @property
     def get_cart_total(self): # Show the total price to pay
