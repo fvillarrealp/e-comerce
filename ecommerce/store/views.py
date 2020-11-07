@@ -74,3 +74,9 @@ def updateItem(request):
         orderItem.delete()
 
     return JsonResponse('It was added', safe=False)
+
+
+
+def processOrder(request):
+    print('data: ', request.body)
+    return JsonResponse('Payment success! congrats', safe=False)
