@@ -3,7 +3,7 @@ from django.http import JsonResponse
 import json
 from datetime import datetime
 from .models import *
-from.utils import cookieCart, cartData
+from.utils import cookieCart, cartData, guestOrder
 
 # Create your views here.
 def store(request):
@@ -65,7 +65,10 @@ def updateItem(request):
     return JsonResponse('It was added', safe=False)
 
 
-
+#from django.views.decorators.csrf import csrf_exempt
+# Both lines used to fix csfr_cookies token errors
+# Here we dont have the token but we're able to sent the info withoud one (not recommended)
+#@csrf_exempt
 def processOrder(request):
     data = json.loads(request.body)
     transaction_id = datetime.now().timestamp()
@@ -73,26 +76,34 @@ def processOrder(request):
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        total = float(data['form']['total'])
-        Order.transaction_id = transaction_id
 
-        if total == order.get_cart_total:
-            print("holaaaaaaa")
-            order.complete = True
-        
-        order.save()
-
-        if order.shipping == True:
-            ShippingAddress.objects.create(
-                customer=customer,
-                order=order,
-                address=data['shipping']['address'],
-                city=data['shipping']['city'] ,
-                state=data['shipping']['state'] ,
-                zipcode=data['shipping']['zipcode'], 
-            )
     
-    else:
-        print('User is not logged in')
+    else: # Here we're gonna create the order when the user is not logged in
+        customer, order = guestOrder(request, data)
+
+
+        
+    total = float(data['form']['total'])
+    order.transaction_id = transaction_id
+
+    print('*********')
+    print('total:', total, '    cart_total:', float(order.get_cart_total))
+    print('*********')
+    if total == float(order.get_cart_total):
+        print("holaaaaaaa")
+        order.complete = True
+        
+    order.save()
+
+    if order.shipping == True:
+        ShippingAddress.objects.create(
+            customer=customer,
+            order=order,
+            address=data['shipping']['address'],
+            city=data['shipping']['city'] ,
+            state=data['shipping']['state'] ,
+            zipcode=data['shipping']['zipcode'], 
+        )
+
 
     return JsonResponse('Payment success! congrats', safe=False)

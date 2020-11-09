@@ -67,3 +67,41 @@ def cartData(request):
         items = cookieData['items']
     
     return {'items': items, 'order': order, 'cartItems': cartItems}
+
+
+
+def guestOrder(request, data):
+    print('User is not logged in')
+    print('COOKIES:', request.COOKIES)
+
+    name = data['form']['name']
+    email = data['form']['email']
+        
+    cookieData = cookieCart(request)
+    items = cookieData['items']
+
+    # In order to trace a certain user behavior, if someone has made a purchase
+    # we just confirm the email because if him/her wants to create a user in our web,
+    # we already have their last orders data in our database
+    customer, created = Customer.objects.get_or_create(
+        email=email # We use it as a 'foreing key' to identify if someone has made a purchase in the past
+    )
+
+    customer.name = name
+    customer.save()
+
+    order = Order.objects.create(
+        customer=customer,
+        complete=False,
+    )
+
+    for item in items: # Go to cookieCart function to understand the items dictionary
+        product = Product.objects.get(id=item['product']['id'])
+
+        orderitem = OrderItem.objects.create(
+            product=product,
+            order=order,
+            quantity=item['quantity'],  
+        )
+    
+    return customer, order

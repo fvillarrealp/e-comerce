@@ -38,7 +38,8 @@
         }
         return cookieValue;
       }
-      const csrftoken = getToken("csrftoken");
+      var csrftoken = getToken("csrftoken"); // var because we're gonna change it on checkout
+      console.log('CSRFTOKEN:', csrftoken)
 
 
       function getCookie(name){
@@ -63,7 +64,7 @@
       var cart = JSON.parse(getCookie('cart'));
       console.log('cart:',cart);
 
-      // To create a cart for anonimous users
+      // To create a cart for Anonymous users
       if(cart == undefined){
         cart = {};
         console.log('cart was created');

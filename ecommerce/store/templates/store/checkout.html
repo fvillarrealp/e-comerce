@@ -4,6 +4,7 @@
   <div class="col-lg-6">
     <div class="box-element" id="form-wrapper">
       <form id="form">
+        {% csrf_token %}
         <div id="user-info">
           <div class="form-field">
             <input
@@ -122,11 +123,14 @@
   }
 
 
-
+  // IMPORTANT
   var form = document.getElementById("form"); // Let us access to the form's info
 
+  csrftoken = form.getElementsByTagName("input")[0].value // The csrf_token is read as an input field and we neet to catch it
+  console.log('NewToken:', csrftoken)
+
   form.addEventListener("submit", function (e) {
-    // Hide the shipping menu and shows the payment options
+    // Hide the shipping menu anfd shows the payment options
     e.preventDefault();
     console.log("Form submited");
     document.getElementById("form-button").classList.add("hidden");
@@ -145,45 +149,53 @@
       email: null,
       total: total,
     };
-    var shippingIfo = {
+    var shippingInfo = {
       address: null,
       city: null,
-      state: null,
+      state: null,  
       zipcode: null,
     };
 
 
     if (shipping != "False") {
       // Fill shipping data if theres physic values
-      shippingIfo.address = form.address.value;
-      shippingIfo.city = form.city.value;
-      shippingIfo.state = form.state.value;
-      shippingIfo.zipcode = form.zipcode.value;
+      shippingInfo.address = form.address.value;
+      shippingInfo.city = form.city.value;
+      shippingInfo.state = form.state.value;
+      shippingInfo.zipcode = form.zipcode.value;
     }
-    if (user == "AnonimousUser") {
+    if (user == "AnonymousUser") {
       // Fill the user data if is not logged in
       userFormData.name = form.name.value;
       userFormData.email = form.email.value;
     }
 
-
+    console.log('Shipping Info:', shippingInfo)
+	  console.log('User Info:', userFormData)
     // Let's put te info within the model
     var url = "/process_order/";
     console.log("URL:", url);
     fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": csrftoken,
-      },
-      body: JSON.stringify({ 'form': userFormData, 'shipping': shippingIfo }),
-    })
+	    	method:'POST',
+	    	headers:{
+	    		'Content-Type':'applicaiton/json',
+	    		'X-CSRFToken':csrftoken,
+	    	}, 
+	    	body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}),
+	    	credentials: 'include'
+	    })
       .then((response) => {
+        console.log('hello?')
         return response.json();
       })
       .then((data) => {
         console.log("success:", data);
         alert('Transaction complete');
+
+        cart = {} // Get empty the shopping cart when the purchase was already made
+        document.cookie = 'cart=' + JSON.stringify(cart) + ';domain=;path=/'
+        console.log('Hello?')
+
         window.location.href = "{% url 'store' %}" // Return the user to the home page
       });
   }
