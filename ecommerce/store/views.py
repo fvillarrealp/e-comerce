@@ -20,20 +20,64 @@ def store(request):
     context = {'products': products, 'cartItems': cartItems}
     return render(request, 'store/store.html', context)
 
+
+
+
+
 def cart(request):
 
     if request.user.is_authenticated:
         customer = request.user.customer
         order, created = Order.objects.get_or_create(customer= customer, complete=False)
-        items = order.orderitem_set.all() # The reason the reverse is a queryset is, ForeignKey is 1-to-many relationship. Hence, the reverse is a queryset.
+        items = order.orderitem_set.all() # The reason the reverse is a queryset, ForeignKey is 1-to-many relationship.
         cartItems = order.get_cart_items
-    else:
+
+    else: # Inside this else statement we are gonna use thoe cookies because of the user is not logged in
+        try:
+            cart = json.loads(request.COOKIES['cart']) # We can use the cookie in this way since it's read as a string value
+        except:
+            cart = {} # This help us to avoid the bug when we dont have cookies for the moment 
+        
+        print('Cart:',cart)
         items = []
         order = {'get_cart_total': 0, 'get_cart_items': 0, 'shipping': False}
         cartItems = order['get_cart_items']
+        
+
+        # Since we dont have any order, we need to load the variables manually
+        for i in cart:
+            try: #PUT  try if the item is delated when we're in the cart template
+                product = Product.objects.get(id=i)
+                total = product.price * cart[i]['quantity']
+
+                order['get_cart_total'] += total
+                order['get_cart_items'] += cart[i]['quantity']
+
+                item = {
+                    'product':{
+                        'id':i,
+                        'name':product.name,
+                        'price':product.price,
+                        'imageURL':product.imageURL   
+                        },
+                    'quantity':cart[i]['quantity'],
+                    'get_total':total,
+                }
+                items.append(item)
+
+                if product.digital == False: # If any item is not digital, then it requiere shipping
+                    order['shipping'] = True
+            except:
+                pass
+
+        cartItems = order['get_cart_items']
+
 
     context = {'items': items, 'order': order, 'cartItems': cartItems}
     return render(request, 'store/cart.html', context)
+
+
+
 
 def checkout(request):
 
@@ -49,6 +93,9 @@ def checkout(request):
 
     context = {'items': items, 'order': order, 'cartItems': cartItems}
     return render(request, 'store/checkout.html', context)
+
+
+
 
 def updateItem(request):
     data = json.loads(request.body) # Parse the string to json
@@ -75,6 +122,8 @@ def updateItem(request):
         orderItem.delete()
 
     return JsonResponse('It was added', safe=False)
+
+
 
 
 

@@ -8,18 +8,56 @@ for(var i = 0; i < updateBtns.length; i++){
         console.log('user:', user)
 
         if(user == 'AnonymousUser'){
-            console.log('Not logged in')
+            addCookieItem(productId, action)
         } else {
             updateUserOrder(productId, action)
         }
     })
 }
 
+//
+function addCookieItem(productId, action){
+    console.log('Not logged in, jeje')
+
+    /* How a cart works
+    cart = {
+        1:{'quantity':4},
+        3:{'quantity':2},
+        5:{'quantity':7},
+    }
+    */
+
+    // Manage the cart without a user
+    if(action == 'add'){
+        if(cart[productId] == undefined){ // When the item is not in the cart
+            cart[productId] = {'quantity':1}
+
+        } else{
+            cart[productId]['quantity'] += 1
+        }
+    }
+
+    if(action == 'remove'){
+        cart[productId]['quantity'] -= 1
+
+        if(cart[productId]['quantity'] <= 0){
+            console.log('item delated')
+            delete cart[productId]
+        }
+    }
+
+    console.log('Cart:',cart)
+    document.cookie = 'cart=' + JSON.stringify(cart) + ';domain=;path=/' // Update the cookie every time an action happens
+    location.reload()
+
+}
+
+// Put the data in the backend when the user is logged in
 function updateUserOrder(productId, action){
     console.log('User is logged in, sending data... ...')
 
     // USE CTRL + F5 IF THE BROWSER DOESN'T UPDATE
-    var url = '/update_item/'
+    var url = '/update_item/' // <---- Redirect the action to views.updateItem
     console.log('URL:', url)
     fetch(url, {
         method: 'POST',

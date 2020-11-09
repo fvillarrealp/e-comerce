@@ -39,6 +39,38 @@
         return cookieValue;
       }
       const csrftoken = getToken("csrftoken");
+
+
+      function getCookie(name){
+        // Split cookie string and get all individual name=value pairs in array
+        var cookieArr = document.cookie.split(";");
+
+        // Loop through the elements
+        for(var i = 0; i < cookieArr.length; i ++){
+          var cookiePair = cookieArr[i].split("=");
+
+          // trim() delate white spaces before and after the cookie name
+          if(name == cookiePair[0].trim()){
+            // Decode the cookie value and return
+            return decodeURIComponent(cookiePair[1]);
+          } 
+        } 
+
+        // Return null if not found
+        return null;
+
+      }
+      var cart = JSON.parse(getCookie('cart'));
+      console.log('cart:',cart);
+
+      // To create a cart for anonimous users
+      if(cart == undefined){
+        cart = {};
+        console.log('cart was created');
+
+        document.cookie = 'cart=' + JSON.stringify(cart) + ';domain=;path=/'; 
+      }
+
     </script>
   </head>
   <body>

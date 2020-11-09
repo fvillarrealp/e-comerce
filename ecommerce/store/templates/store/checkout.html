@@ -112,10 +112,10 @@
   if (shipping == "False") {
     document.getElementById("shipping-info").innerHTML = ""; // Remove the shipping form when all the products are digital
   }
-  if (user != "AnonimousUser") {
+  if (user != "AnonymousUser") {
     document.getElementById("user-info").innerHTML = ""; // Remove data we already have if the user is logged in
   }
-  if (shipping == "False" && user != "AnonimousUser") {
+  if (shipping == "False" && user != "AnonymousUser") {
     // Hide the entire form and show payment options
     document.getElementById("form-wrapper").classList.add("hidden");
     document.getElementById("payment-info").classList.remove("hidden");
