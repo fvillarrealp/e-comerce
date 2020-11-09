@@ -42,10 +42,28 @@ def cookieCart(request):
 
             if product.digital == False: # If any item is not digital, then it requiere shipping
                 order['shipping'] = True
-                
+
         except:
             pass
 
         cartItems = order['get_cart_items']
 
+    return {'items': items, 'order': order, 'cartItems': cartItems}
+
+
+
+
+def cartData(request):
+    
+    if request.user.is_authenticated:
+        customer = request.user.customer
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+        items = order.orderitem_set.all()  # The reason the reverse is a queryset, ForeignKey is 1-to-many relationship.
+        cartItems = order.get_cart_items
+    else: # Inside this else statement we are gonna use the cookies because the user is not logged in
+        cookieData = cookieCart(request)
+        cartItems = cookieData['cartItems']
+        order = cookieData['order']
+        items = cookieData['items']
+    
     return {'items': items, 'order': order, 'cartItems': cartItems}

@@ -3,18 +3,12 @@ from django.http import JsonResponse
 import json
 from datetime import datetime
 from .models import *
-from.utils import cookieCart
+from.utils import cookieCart, cartData
 
 # Create your views here.
 def store(request):
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer= customer, complete=False)
-        items = order.orderitem_set.all() # The reason the reverse is a queryset is, ForeignKey is 1-to-many relationship. Hence, the reverse is a queryset.
-        cartItems = order.get_cart_items
-    else: # Inside this else statement we are gonna use the cookies because the user is not logged in
-        cookieData = cookieCart(request)
-        cartItems = cookieData['cartItems']
+    data = cartData(request)
+    cartItems = data['cartItems']
 
     products = Product.objects.all()
     context = {'products': products, 'cartItems': cartItems}
@@ -22,44 +16,25 @@ def store(request):
 
 
 
-
-
 def cart(request):
-
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer= customer, complete=False)
-        items = order.orderitem_set.all() # The reason the reverse is a queryset, ForeignKey is 1-to-many relationship.
-        cartItems = order.get_cart_items
-
-    else: # Inside this else statement we are gonna use the cookies because the user is not logged in
-        cookieData = cookieCart(request)
-        cartItems = cookieData['cartItems']
-        order = cookieData['order']
-        items = cookieData['items']
+    data = cartData(request)
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
 
     context = {'items': items, 'order': order, 'cartItems': cartItems}
     return render(request, 'store/cart.html', context)
 
 
 
-
 def checkout(request):
-
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer=customer, complete=False)
-        items = order.orderitem_set.all() # The reason the reverse is a queryset is, ForeignKey is 1-to-many relationship. Hence, the reverse is a queryset.
-        cartItems = order.get_cart_items
-    else: # Inside this else statement we are gonna use the cookies because the user is not logged in
-        cookieData = cookieCart(request)
-        cartItems = cookieData['cartItems']
-        order = cookieData['order']
-        items = cookieData['items']
+    data = cartData(request)
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
 
     context = {'items': items, 'order': order, 'cartItems': cartItems}
     return render(request, 'store/checkout.html', context)
-
 
 
 
@@ -88,8 +63,6 @@ def updateItem(request):
         orderItem.delete()
 
     return JsonResponse('It was added', safe=False)
-
-
 
 
 
