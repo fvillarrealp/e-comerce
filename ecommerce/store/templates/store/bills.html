@@ -1,0 +1,28 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<br>
+<div class="box-element">
+    <div class="cart-row">
+        <div style="flex:2"><strong>Customer</strong></div>
+        <div style="flex:1"><strong>ID</strong></div>
+        <div style="flex:1"><strong></strong></div>
+    </div>
+    
+    
+    {% for order in orders %}
+    {% if order.complete %}
+    <div class="cart-row">
+        <div style="flex:2"><p>{{order.customer.email}}</p></div>
+        <div style="flex:2"><p>{{order.id}}</p></div>
+        <div>
+            <a  style="float:right; margin:5px;" class="btn btn-success" href="{{order.id}}">View Order</a>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    
+</div>
+
+{% endblock content %}

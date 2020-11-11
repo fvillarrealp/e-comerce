@@ -107,3 +107,19 @@ def processOrder(request):
 
 
     return JsonResponse('Payment success! congrats', safe=False)
+
+
+def billsList(request):
+    orders = Order.objects.all()
+    
+    context = {'orders': orders}
+    return render(request, 'store/bills.html', context)
+
+
+def billByID(request, orderID):
+    order = Order.objects.get(id=orderID)
+    items = order.orderitem_set.all()
+    cartItems = order.get_cart_items
+
+    context = {'items': items, 'order': order, 'cartItems': cartItems}
+    return render(request, 'store/individualBill.html', context)
