@@ -119,7 +119,6 @@ def billsList(request):
 def billByID(request, orderID):
     order = Order.objects.get(id=orderID)
     items = order.orderitem_set.all()
-    cartItems = order.get_cart_items
 
-    context = {'items': items, 'order': order, 'cartItems': cartItems}
+    context = {'items': items, 'order': order}
     return render(request, 'store/individualBill.html', context)
